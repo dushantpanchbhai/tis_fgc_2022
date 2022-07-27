@@ -11,12 +11,11 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.drive.SampleTankDrive;
 
 @Config
-@TeleOp(name = "joystick control",group = "control")
-public class JoystickControl extends LinearOpMode {
+@TeleOp(name = "joystick control 3",group = "control")
+public class JoystickControl3 extends LinearOpMode {
 
-    DcMotorEx lifter1,lifter2,shooter1,shooter2,intake;
+    DcMotorEx lifter1,lifter2,intake1,intake2;
     Servo holder;
-
     public static double intake_power = 1;
     public static int inc = 10;
     public int pos = 0;
@@ -33,14 +32,10 @@ public class JoystickControl extends LinearOpMode {
         SampleTankDrive drive = new SampleTankDrive(hardwareMap);
         drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        holder = hardwareMap.get(Servo.class,"holder");
-
-        shooter1 = hardwareMap.get(DcMotorEx.class,"intake1");
-        shooter2 = hardwareMap.get(DcMotorEx.class,"intake2");
-        intake = hardwareMap.get(DcMotorEx.class,"intake3");
-        shooter1.setPower(0);
-        shooter2.setPower(0);
-        intake.setPower(0);
+        intake1 = hardwareMap.get(DcMotorEx.class,"intake1");
+        intake2 = hardwareMap.get(DcMotorEx.class,"intake2");
+        intake1.setPower(0);
+        intake2.setPower(0);
 
         lifter1 = hardwareMap.get(DcMotorEx.class,"lifter1");
         lifter1.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
@@ -59,6 +54,8 @@ public class JoystickControl extends LinearOpMode {
         lifter2.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
         lifter2.setPower(1);
 
+        holder = hardwareMap.get(Servo.class,"holder");
+
         waitForStart();
 
         while(opModeIsActive())
@@ -66,18 +63,18 @@ public class JoystickControl extends LinearOpMode {
 
             drive.setWeightedDrivePower(
                     new Pose2d(
-                            gamepad1.left_stick_y,
+                            -gamepad1.left_stick_y,
                             0,
                             -gamepad1.right_stick_x
                     )
             );
             drive.update();
 
-            if(gamepad1.dpad_down)
+            if(gamepad1.x)
             {
                 holder.setPosition(hold_position);
             }
-            else if(gamepad1.dpad_up)
+            else if(gamepad1.a)
             {
                 holder.setPosition(release_position);
             }
@@ -93,33 +90,20 @@ public class JoystickControl extends LinearOpMode {
                 moveTo(pos);
             }
 
-            if(gamepad1.x)
-            {
-                intake.setPower(1);
-            }
-            else if(gamepad1.a)
-            {
-                intake.setPower(-1);
-            }
-            else
-            {
-                intake.setPower(0);
-            }
-
             if(gamepad1.right_bumper)
             {
-                shooter1.setPower(intake_power);
-                shooter2.setPower(-intake_power);
+                intake1.setPower(intake_power);
+                intake2.setPower(-intake_power);
             }
             else if(gamepad1.left_bumper)
             {
-                shooter1.setPower(-intake_power);
-                shooter2.setPower(intake_power);
+                intake1.setPower(-intake_power);
+                intake2.setPower(intake_power);
             }
             else
             {
-                shooter1.setPower(0);
-                shooter2.setPower(0);
+                intake1.setPower(0);
+                intake2.setPower(0);
             }
 
             telemetry.addData("lifter1 position",lifter1.getCurrentPosition());
