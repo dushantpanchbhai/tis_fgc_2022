@@ -6,32 +6,47 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
+import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.teamcode.drive.SampleTankDrive;
 
+import java.util.Arrays;
+import java.util.List;
+
 @Config
-@TeleOp(name = "joystick control",group = "control")
-public class JoystickControl extends LinearOpMode {
+@TeleOp(name = "joystick control 4",group = "control")
+public class JoystickControl4 extends LinearOpMode {
 
     DcMotorEx lifter1,lifter2,shooter1,shooter2,intake;
     Servo holder;
+    DcMotorEx leftRear,rightRear;
+
 
     public static double intake_power = 1;
     public static int inc = 10;
     public int pos = 0;
 
-    public static double hold_position = 0.6;
+    public static double hold_position = 0.76;
     public static double release_position = 0.2;
 
     public static int factor1 = 1;
     public static int factor2 = 1;
 
+    double drive,turn,leftPower,rightPower;
+
     @Override
     public void runOpMode() throws InterruptedException {
 
-        SampleTankDrive drive = new SampleTankDrive(hardwareMap);
-        drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        leftRear = hardwareMap.get(DcMotorEx.class, "leftRear");
+        rightRear = hardwareMap.get(DcMotorEx.class, "rightRear");
+
+        leftRear.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        rightRear.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+
+        leftRear.setDirection(DcMotorSimple.Direction.REVERSE);
 
         holder = hardwareMap.get(Servo.class,"holder");
 
@@ -63,15 +78,14 @@ public class JoystickControl extends LinearOpMode {
 
         while(opModeIsActive())
         {
-
-            drive.setWeightedDrivePower(
-                    new Pose2d(
-                            gamepad1.left_stick_y,
-                            0,
-                            -gamepad1.right_stick_x
-                    )
-            );
-            drive.update();
+            // ####### motor localization code ##############
+            drive = gamepad1.left_stick_y;
+            turn  = -gamepad1.right_stick_x*0.75;
+            leftPower    = Range.clip(drive + turn, -1.0, 1.0) ;
+            rightPower   = Range.clip(drive - turn, -1.0, 1.0) ;
+            leftRear.setPower(leftPower);
+            rightRear.setPower(rightPower);
+//            #################################################
 
             if(gamepad1.right_trigger > 0)
             {
